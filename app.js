@@ -130,6 +130,7 @@ const state = {
   dragStartY: 0,
   dragX: 0,
   dragY: 0,
+  touchActive: false,
   lastTap: 0,
   zoomed: false
 };
@@ -303,7 +304,7 @@ async function sharePage() {
 }
 
 function onStagePointerDown(event) {
-  if (state.mode !== "gallery" || lightbox.open) return;
+  if (event.pointerType === "touch" || state.mode !== "gallery" || lightbox.open) return;
   state.dragStartX = event.clientX;
   state.dragStartY = event.clientY;
   state.dragX = 0;
@@ -312,7 +313,7 @@ function onStagePointerDown(event) {
 }
 
 function onStagePointerMove(event) {
-  if (state.mode !== "gallery" || lightbox.open || !event.currentTarget.hasPointerCapture?.(event.pointerId)) return;
+  if (event.pointerType === "touch" || state.mode !== "gallery" || lightbox.open || !event.currentTarget.hasPointerCapture?.(event.pointerId)) return;
   state.dragX = event.clientX - state.dragStartX;
   state.dragY = event.clientY - state.dragStartY;
   if (Math.abs(state.dragY) > Math.abs(state.dragX)) {
@@ -324,8 +325,12 @@ function onStagePointerMove(event) {
 }
 
 function onStagePointerUp(event) {
-  if (state.mode !== "gallery" || lightbox.open) return;
+  if (event.pointerType === "touch" || state.mode !== "gallery" || lightbox.open) return;
   event.currentTarget.releasePointerCapture?.(event.pointerId);
+  finishStageGesture(event.clientX, event.clientY);
+}
+
+function finishStageGesture(clientX, clientY) {
   const vertical = Math.abs(state.dragY) > Math.abs(state.dragX);
   const shouldMove = vertical && Math.abs(state.dragY) > 54;
   appShell.style.setProperty("--drag-y", "0px");
@@ -333,11 +338,41 @@ function onStagePointerUp(event) {
   if (shouldMove) {
     goTo(state.index + (state.dragY < 0 ? 1 : -1), state.dragY < 0 ? 1 : -1);
   } else if (Math.abs(state.dragX) < 10 && Math.abs(state.dragY) < 10) {
-    const tapped = document.elementFromPoint(event.clientX, event.clientY);
+    const tapped = document.elementFromPoint(clientX, clientY);
     if (tapped?.closest(".center-frame")) openViewer();
   }
   state.dragX = 0;
   state.dragY = 0;
+}
+
+function onStageTouchStart(event) {
+  if (state.mode !== "gallery" || lightbox.open || event.touches.length !== 1) return;
+  const touch = event.touches[0];
+  state.touchActive = true;
+  state.dragStartX = touch.clientX;
+  state.dragStartY = touch.clientY;
+  state.dragX = 0;
+  state.dragY = 0;
+}
+
+function onStageTouchMove(event) {
+  if (!state.touchActive || state.mode !== "gallery" || lightbox.open || event.touches.length !== 1) return;
+  const touch = event.touches[0];
+  state.dragX = touch.clientX - state.dragStartX;
+  state.dragY = touch.clientY - state.dragStartY;
+  if (Math.abs(state.dragY) >= Math.abs(state.dragX)) {
+    event.preventDefault();
+    const eased = Math.sign(state.dragY) * Math.min(70, Math.abs(state.dragY) * 0.42);
+    appShell.style.setProperty("--drag-y", `${eased}px`);
+    appShell.style.setProperty("--main-scale", `${1 - Math.min(0.035, Math.abs(state.dragY) / 6000)}`);
+  }
+}
+
+function onStageTouchEnd(event) {
+  if (!state.touchActive) return;
+  const touch = event.changedTouches[0];
+  state.touchActive = false;
+  finishStageGesture(touch.clientX, touch.clientY);
 }
 
 function onLightboxPointerDown(event) {
@@ -413,6 +448,10 @@ document.querySelector("#heroStage").addEventListener("pointerdown", onStagePoin
 document.querySelector("#heroStage").addEventListener("pointermove", onStagePointerMove, { passive: false });
 document.querySelector("#heroStage").addEventListener("pointerup", onStagePointerUp);
 document.querySelector("#heroStage").addEventListener("pointercancel", onStagePointerUp);
+document.querySelector("#heroStage").addEventListener("touchstart", onStageTouchStart, { passive: true });
+document.querySelector("#heroStage").addEventListener("touchmove", onStageTouchMove, { passive: false });
+document.querySelector("#heroStage").addEventListener("touchend", onStageTouchEnd, { passive: true });
+document.querySelector("#heroStage").addEventListener("touchcancel", onStageTouchEnd, { passive: true });
 document.querySelector("#lightboxFrame").addEventListener("pointerdown", onLightboxPointerDown);
 document.querySelector("#lightboxFrame").addEventListener("pointerup", onLightboxPointerUp);
 document.querySelector("#lightboxFrame").addEventListener("click", onDoubleTap);
