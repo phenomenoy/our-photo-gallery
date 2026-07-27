@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#12100f" />
+    <meta name="description" content="一座只为照片而存在的移动端艺术展。" />
+    <meta property="og:title" content="Photo Gallery" />
+    <meta property="og:description" content="一座只为照片而存在的移动端艺术展。" />
+    <meta property="og:image" content="./assets/og-cover.jpg" />
+    <title>Photo Gallery</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2312100f'/%3E%3Ccircle cx='32' cy='28' r='15' fill='%23f0b8aa'/%3E%3Cpath d='M16 45c7-8 13-11 18-9 5 1 8 5 14 9' fill='none' stroke='%23fffaf1' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <link rel="preload" as="image" href="./assets/photo-01.webp" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell" id="appShell">
+      <div class="ambient" id="ambient" aria-hidden="true"></div>
+      <div class="grain" aria-hidden="true"></div>
+
+      <header class="chrome top-chrome" aria-label="展览状态">
+        <span class="counter" id="counter">01 / 11</span>
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-text">正在展出</span>
+        <div class="chrome-actions">
+          <button class="icon-button active" id="galleryMode" type="button" aria-label="切换到展厅模式" title="展厅">
+            <span aria-hidden="true">⌂</span>
+          </button>
+          <button class="icon-button" id="albumMode" type="button" aria-label="切换到相册模式" title="相册">
+            <span aria-hidden="true">▦</span>
+          </button>
+          <button class="icon-button" id="shareButton" type="button" aria-label="分享页面" title="分享">
+            <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="gallery" id="gallery" aria-live="polite">
+        <section class="hero-stage" id="heroStage" aria-label="照片展厅">
+          <figure class="side-frame side-left" aria-hidden="true">
+            <img id="prevPreview" alt="" />
+          </figure>
+          <figure class="center-frame">
+            <img id="mainPhoto" alt="" />
+            <button class="photo-hit" id="openLightbox" type="button" aria-label="查看大图"></button>
+          </figure>
+          <figure class="side-frame side-right" aria-hidden="true">
+            <img id="nextPreview" alt="" />
+          </figure>
+          <div class="stage-copy" id="stageCopy">
+            <p id="chapter">第一展厅</p>
+            <strong id="title">风经过沙丘</strong>
+            <span id="caption">蓝天、沙丘和粉色花影，把夏天停在这一秒。</span>
+          </div>
+        </section>
+
+        <section class="album-panel" id="albumPanel" aria-label="照片相册">
+          <div class="album-head">
+            <span id="albumCount">11 张照片</span>
+            <strong>慢慢看，每一张都值得停一下。</strong>
+          </div>
+          <div class="filmstrip" id="filmstrip" role="list"></div>
+        </section>
+      </main>
+
+      <footer class="chrome bottom-chrome" aria-label="展览进度">
+        <button class="nav-button" id="prevButton" type="button" aria-label="上一张">
+          <span aria-hidden="true">↑</span>
+        </button>
+        <div class="progress-track" aria-hidden="true"><span id="progressFill"></span></div>
+        <button class="nav-button" id="nextButton" type="button" aria-label="下一张">
+          <span aria-hidden="true">↓</span>
+        </button>
+      </footer>
+    </div>
+
+    <dialog class="lightbox" id="lightbox" aria-label="大图预览">
+      <div class="lightbox-backdrop" data-close="true"></div>
+      <div class="lightbox-frame" id="lightboxFrame">
+        <img id="lightboxImage" alt="" />
+      </div>
+      <div class="lightbox-chrome">
+        <button class="icon-button" id="closeLightbox" type="button" aria-label="关闭大图">
+          <span aria-hidden="true">×</span>
+        </button>
+        <span id="lightboxTitle">照片</span>
+        <div class="lightbox-actions">
+          <button class="icon-button" id="lightboxPrev" type="button" aria-label="上一张">
+            <span aria-hidden="true">‹</span>
+          </button>
+          <button class="icon-button" id="lightboxNext" type="button" aria-label="下一张">
+            <span aria-hidden="true">›</span>
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
