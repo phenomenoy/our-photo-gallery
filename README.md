@@ -12,4 +12,4 @@ python -m http.server 8788 --bind 127.0.0.1
 
 ## GitHub Pages
 
-仓库推送到 GitHub 后，`.github/workflows/pages.yml` 会自动发布静态站点。
+仓库使用 GitHub Pages 的 `main` 分支根目录发布，不需要构建步骤。
